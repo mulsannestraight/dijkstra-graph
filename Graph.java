@@ -48,11 +48,6 @@ public class Graph {
         array[tempIndex].insert(stringFromChar(string.charAt(i + 1)), intFromChar(string.charAt(i + 2)));
       }
     }
-    System.out.println("Size of array: " + size);
-    for (int i = 0; i < size; i++) {
-      System.out.println("Size of LinkedList at index " + i + ": " + array[i].getSize());
-    } 
-    System.out.println("The smallest value is: " + findSmallestNode(array[5]).getValue());
   }
   public void shortestPath(String origin) {
     int originIndex = findLinkedListIndex(origin.charAt(0));
