@@ -55,7 +55,38 @@ public class Graph {
     System.out.println("The smallest value is: " + findSmallestNode(array[5]).getValue());
   }
   public void shortestPath(String origin) {
-    
+    int originIndex = findLinkedListIndex(origin.charAt(0));
+    SLinkedList originLinkedList = array[originIndex];
+    int listSize = originLinkedList.getSize();
+
+    // Push Nodes from originLinkedList to the stack in desceding order
+    Node[] descendingNodes = new Node[listSize - 1];
+    Node temp = originLinkedList.getHead().getNext();
+    for (int i = 0; i < listSize - 1; i++) {
+      descendingNodes[i] = temp;
+      temp = temp.getNext();
+    }
+    // selection sort
+    for (int i = 0; i < listSize - 2; i++) {
+      int minIndex = i;
+      for (int j = i + 1; j < listSize - 1; j++) {
+        if (descendingNodes[j].getValue() > descendingNodes[minIndex].getValue()) {
+          minIndex = j;
+        }
+
+        Node swap = descendingNodes[minIndex];
+        descendingNodes[minIndex] = descendingNodes[i];
+        descendingNodes[i] = swap;
+      }
+    }
+
+    Stack<Node> stack = new Stack<Node>();
+    for (int i = 0; i < descendingNodes.length; i++) {
+      stack.push(descendingNodes[i]);
+    }
+    boolean[] visited = new boolean[size];
+    String[] path = new String[size];
+    visited[originIndex] = true;
   }
   public Node findSmallestNode(SLinkedList linkedList) {
     Node smallest = linkedList.getHead().getNext();
