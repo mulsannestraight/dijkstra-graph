@@ -11,6 +11,9 @@ public class Graph {
 
   int size; 
   SLinkedList[] array;
+  char[] vertices = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+  boolean[] visited = new boolean[vertices.length];
+  int[] shortestPath = new int[vertices.length];
 
   public static void main(String[] args) {
     Graph graph = new Graph("city.txt");
@@ -54,14 +57,46 @@ public class Graph {
     }
   }
   public void shortestPath(String origin) {
-    
-    char[] vertices = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-    boolean[] visited = new boolean[vertices.length];
-    int[] shortestPath = new int[vertices.length];
     Arrays.fill(shortestPath, Integer.MAX_VALUE);
-  }
-  public SLinkedList findShortestUnvisitedNode() {
+    Stack<SLinkedList> stack = new Stack<SLinkedList>();
+    int currentPathWeight = 0;
+    SLinkedList first = array[0]; //sets starting node as first assigned vertex
+    stack.push(first);
     
+      do{
+        SLinkedList current = stack.peek();
+        if(findShortestUnvisitedNode(current,currentPathWeight)!=null){ 
+            stack.push(array[findLinkedListIndex(findShortestUnvisitedNode(current,currentPathWeight).getName().charAt(0))]); //pushes node with shortest edge onto stack
+            visited[findLinkedListIndex((stack.peek().getHead().getName().charAt(0)))] = true;
+            currentPathWeight = currentPathWeight + stack.peek().getHead().getValue(); //updates total length of stack
+        }
+        else{
+            
+          currentPathWeight = currentPathWeight - stack.pop().getHead().getValue(); //updates total length of stack
+          //***WIP*** Store the path/destination to print
+        }
+            
+          }while(!stack.empty());
+  }
+
+  private Node findShortestUnvisitedNode(SLinkedList checkme, int currentPathWeight){ //finds shortest unvisited node or returns null
+    //we need to compare our current path length (to a given node) and update if this node has shorter shortestPath + edge
+    Node a = checkme.getHead();
+    Node b = a;
+    if(a.getNext()!=null){
+        while(a.getNext()!=null){ 
+        a = a.getNext();
+            if(!visited[findLinkedListIndex(a.getName().charAt(0))] && (a.getValue() + currentPathWeight) <= shortestPath[findLinkedListIndex(a.getName().charAt(0))]){ //checks for unvisited/shortest
+              shortestPath[findLinkedListIndex(a.getName().charAt(0))] = currentPathWeight + a.getValue(); //updates array
+              b = a;
+            }
+
+          }
+    }
+    if(b == a){
+      return null;
+    }
+    return b;
   }
   public String getVertices() {
     return "";
