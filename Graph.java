@@ -1,4 +1,7 @@
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Stack;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -6,13 +9,14 @@ import java.io.File;
 
 public class Graph {
 
-  int size; // total vertices
+  int size; 
   SLinkedList[] array;
 
   public static void main(String[] args) {
     Graph graph = new Graph("city.txt");
     graph.print();
     graph.shortestPath("a");
+    //System.out.println(graph.getVertices());
   }
   public Graph(int size, SLinkedList[] array) {
     this.size = size;
@@ -50,38 +54,17 @@ public class Graph {
     }
   }
   public void shortestPath(String origin) {
-    int originIndex = findLinkedListIndex(origin.charAt(0));
-    SLinkedList originLinkedList = array[originIndex];
-    int listSize = originLinkedList.getSize();
-
-    // Push Nodes from originLinkedList to the stack in desceding order
-    Node[] descendingNodes = new Node[listSize - 1];
-    Node temp = originLinkedList.getHead().getNext();
-    for (int i = 0; i < listSize - 1; i++) {
-      descendingNodes[i] = temp;
-      temp = temp.getNext();
-    }
-    // selection sort
-    for (int i = 0; i < listSize - 2; i++) {
-      int minIndex = i;
-      for (int j = i + 1; j < listSize - 1; j++) {
-        if (descendingNodes[j].getValue() > descendingNodes[minIndex].getValue()) {
-          minIndex = j;
-        }
-
-        Node swap = descendingNodes[minIndex];
-        descendingNodes[minIndex] = descendingNodes[i];
-        descendingNodes[i] = swap;
-      }
-    }
-
-    Stack<Node> stack = new Stack<Node>();
-    for (int i = 0; i < descendingNodes.length; i++) {
-      stack.push(descendingNodes[i]);
-    }
-    boolean[] visited = new boolean[size];
-    String[] path = new String[size];
-    visited[originIndex] = true;
+    
+    char[] vertices = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    boolean[] visited = new boolean[vertices.length];
+    int[] shortestPath = new int[vertices.length];
+    Arrays.fill(shortestPath, Integer.MAX_VALUE);
+  }
+  public SLinkedList findShortestUnvisitedNode() {
+    
+  }
+  public String getVertices() {
+    return "";
   }
   public Node findSmallestNode(SLinkedList linkedList) {
     Node smallest = linkedList.getHead().getNext();
