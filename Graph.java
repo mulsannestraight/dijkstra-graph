@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.File;
+import java.util.*;
 
 public class Graph {
   int size; 
@@ -10,7 +11,7 @@ public class Graph {
 
   public static void main(String[] args) {
     Graph graph = new Graph("city.txt");
-    //graph.printGraph();
+    graph.printGraph();
     graph.shortestPath("a");
     //System.out.println(graph.getVertices());
   }
@@ -19,35 +20,73 @@ public class Graph {
     this.array = array;
   }
   public Graph(String fileName) {
-    String string = readFile(fileName);
-    string = cleanString(string);
-    
-    // get size of the SLinkedList array
-    size = 1;
-    char temp = string.charAt(0);
-    for (int i = 3; i < string.length(); i = i + 3) {
-      if (temp != string.charAt(i)) size++;
-      temp = string.charAt(i);
+    ArrayList<String> list = stringList(fileName);
+    ArrayList<String> nodeList = new ArrayList<String>();
+
+    nodeList.add(list.get(0));
+    // By the end of loop, nodeList will contain all elements at indices that are multiples of 3 from 'list'
+    for (int i = 3; i < list.size(); i++) {
+      if (i % 3 == 0) {
+        nodeList.add(list.get(i));
+      }
     }
+    // convert a list into a set will get rid of duplicate elements
+    // then convert the set back to list
+    Set<String> set = new HashSet<String>(nodeList);
+    nodeList = new ArrayList<String>(new HashSet<String>(nodeList));
     
+    this.size = nodeList.size(); 
+
     array = new SLinkedList[size];
     for (int i = 0; i < size; i++) {
       array[i] = new SLinkedList();
     }
+
     // putting each element in respective SLinkedList[] index
     int currentIndex = 0;
-    for (int i = 0; i < string.length(); i = i + 3) {
-      int tempIndex = findLinkedListIndex(string.charAt(i));
-      // no linked list is created for this char yet
+    for (int i = 0; i < list.size(); i = i + 3) {
+      int tempIndex = findLinkedListIndex(list.get(i));
       if (tempIndex == -1) {
-        Node newNode = new Node(stringFromChar(string.charAt(i)), 0);
+        Node newNode = new Node(list.get(i), 0);
         array[currentIndex] = new SLinkedList(newNode);
-        array[currentIndex].insert(stringFromChar(string.charAt(i + 1)), intFromChar(string.charAt(i + 2)));
+        array[currentIndex].insert(list.get(i + 1), Integer.parseInt(list.get(i + 2)));
         currentIndex++;
       } else {
-        array[tempIndex].insert(stringFromChar(string.charAt(i + 1)), intFromChar(string.charAt(i + 2)));
+        array[tempIndex].insert(list.get(i+1), Integer.parseInt(list.get(i+2)));
       }
     }
+    System.out.println("LINKED LIST SIZE: " + array.length);
+    for (int i = 0; i < array.length; i++) {
+      System.out.println(array[i].getSize());
+    }
+  }
+  public ArrayList<String> stringList(String fileName) {
+    String string = readFile(fileName);
+    ArrayList<String> list = new ArrayList<String>();
+    for (int i = 0; i < string.length(); i++) {
+      list.add(i, "");
+    }
+
+    char temp = '\u0000';
+    int index = 0;
+    for (int i = 0; i < string.length(); i++) {
+      temp = string.charAt(i);
+      if (Character.isLetter(temp)) {
+        list.set(index, Character.toString(temp));
+        index++;
+      } else if (Character.isDigit(temp)) {
+        String s = list.get(index) + Character.toString(temp);
+        list.set(index, s);
+      } else if (temp == '\n') {
+        index++;
+      }
+    }
+    for (int i = string.length() - 1; i >= 0; i--) {
+      if (list.get(i).equals("")) {
+        list.remove(i);
+      }
+    }
+    return list;
   }
   public void shortestPath(String origin) {
     Magic m1 = new Magic(array[0].getHead().getName(), false, "");
@@ -141,7 +180,7 @@ public class Graph {
       }
     }
     return smallTemp;
-  } 
+  }
   // Magic Class
   public static class Magic {
     String name;
@@ -188,23 +227,13 @@ public class Graph {
     }
     return "";
   }
-  public String cleanString(String string) {
-    string = string.replaceAll("\\s", "");
-    return string;
-  }
-  public String stringFromChar(char c) {
-    return Character.toString(c);
-  }
-  public int intFromChar(char c) {
-    return Character.getNumericValue(c);
-  }
   // Find out what character belongs to what index in the array
-  public int findLinkedListIndex(char c) {
+  public int findLinkedListIndex(String c) {
     Node current;
     for (int i = 0; i < size; i++) {
       current = array[i].getHead();
       if (current != null) {
-        if (current.getName().equals(stringFromChar(c)))
+        if (current.getName().equals(c))
           return i;
       }
     }
