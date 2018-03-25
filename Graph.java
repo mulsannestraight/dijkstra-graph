@@ -1,18 +1,19 @@
 import java.nio.file.Files;
-import java.util.Stack;
+import java.util.Arrays;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.File;
 
 public class Graph {
 
-  int size; // total vertices
+  int size; 
   SLinkedList[] array;
 
   public static void main(String[] args) {
     Graph graph = new Graph("city.txt");
-    graph.print();
+    //graph.printGraph();
     graph.shortestPath("a");
+    //System.out.println(graph.getVertices());
   }
   public Graph(int size, SLinkedList[] array) {
     this.size = size;
@@ -50,49 +51,106 @@ public class Graph {
     }
   }
   public void shortestPath(String origin) {
-    int originIndex = findLinkedListIndex(origin.charAt(0));
-    SLinkedList originLinkedList = array[originIndex];
-    int listSize = originLinkedList.getSize();
+    Magic m1 = new Magic(array[0].getHead().getName(), false, "");
+    Magic m2 = new Magic(array[1].getHead().getName(), false, "");
+    Magic m3 = new Magic(array[2].getHead().getName(), false, "");
+    Magic m4 = new Magic(array[3].getHead().getName(), false, "");
+    Magic m5 = new Magic(array[4].getHead().getName(), false, "");
+    Magic m6 = new Magic(array[5].getHead().getName(), false, "");
+    Magic m7 = new Magic(array[1].getHead().getNext().getNext().getName(), false, "");
+    Magic m8 = new Magic(array[4].getHead().getNext().getNext().getName(), false, "");
 
-    // Push Nodes from originLinkedList to the stack in desceding order
-    Node[] descendingNodes = new Node[listSize - 1];
-    Node temp = originLinkedList.getHead().getNext();
-    for (int i = 0; i < listSize - 1; i++) {
-      descendingNodes[i] = temp;
-      temp = temp.getNext();
+    Magic[] candidates = {m1, m2, m3, m4, m5, m6, m7, m8};
+    int index = findMagicIndex(origin, candidates);
+    candidates[index].setWeight(0);
+    updateNeighborsOfNode(origin, candidates);
+    for (int i = 0; i < candidates.length; i++) {
+      System.out.print("Index " + i + ": (" + candidates[i].getName() + ", " + candidates[i].getWeight() + ")");
+      System.out.print(" -- (Visited: " + candidates[i].getVisited() + ")");
+      System.out.print(" -- (Previous: \"" + candidates[i].getPrevious() + "\")\n");
     }
-    // selection sort
-    for (int i = 0; i < listSize - 2; i++) {
-      int minIndex = i;
-      for (int j = i + 1; j < listSize - 1; j++) {
-        if (descendingNodes[j].getValue() > descendingNodes[minIndex].getValue()) {
-          minIndex = j;
-        }
-
-        Node swap = descendingNodes[minIndex];
-        descendingNodes[minIndex] = descendingNodes[i];
-        descendingNodes[i] = swap;
-      }
-    }
-
-    Stack<Node> stack = new Stack<Node>();
-    for (int i = 0; i < descendingNodes.length; i++) {
-      stack.push(descendingNodes[i]);
-    }
-    boolean[] visited = new boolean[size];
-    String[] path = new String[size];
-    visited[originIndex] = true;
   }
-  public Node findSmallestNode(SLinkedList linkedList) {
-    Node smallest = linkedList.getHead().getNext();
-    Node current = linkedList.getHead().getNext();
-    for (int i = 0; i < linkedList.getSize() - 1; i++) {
-      if (smallest.getValue() > current.getValue()) {
-        smallest = current;
-      }
-      current = current.getNext();
+  public int findMagicIndex(String name, Magic[] array) {
+    int j = -1;
+    for (int i = 0; i < array.length; i++) {
+      if (name.equals(array[i].getName())) {
+        j = i;
+        break;
+      } 
     }
-    return smallest;
+    return j;
+  }
+  public Object updateNeighborsOfNode(String startPoint, Magic[] candidates) {
+    int index = findLinkedListIndex(startPoint.charAt(0));
+    if (index == -1) {
+      return null;
+    }
+    SLinkedList linkedList = array[index];
+    Node startNode = linkedList.getHead().getNext();
+    int j;
+
+    for (int i = 0; i < linkedList.size - 1; i++) {
+      j = findMagicIndex(startNode.getName(), candidates);
+      if (candidates[j].getWeight() > startNode.getValue() && !candidates[j].getVisited()) {
+        candidates[j].setWeight(startNode.getValue());
+        candidates[j].setPrevious(startPoint);
+      }
+      startNode = startNode.getNext();
+    }
+    candidates[findMagicIndex(startPoint, candidates)].setVisited(true);
+    return startNode;
+  }
+  public String getVertices() {
+    return "";
+  }
+  /*public Magic findSmallestUnvisitedMagic(Magic[] magic) {
+    Magic smallTemp = null;
+    for (int i = 0; i < magic.length; i++) {
+      if (magic[i].getWeight() != Integer.MAX_VALUE && !magic[i].getVisited()) {
+        smallTemp = magic[i];
+        break;
+      }
+    }
+    for (int i = 1; i < magic.length; i++) {
+      if (smallTemp.getShortestPath() > magic[i].getShortestPath() && !magic[i].getVisited()) {
+        smallTemp = magic[i];
+      }
+    }
+    return smallTemp;
+  } */
+  // Magic Class
+  public static class Magic {
+    String name;
+    boolean visited;
+    int weight;
+    String previous;
+    public Magic(String name, boolean visited, String previous) {
+      this.name = name;
+      this.visited = visited;
+      this.previous = previous;
+      this.weight = Integer.MAX_VALUE;
+    }
+    public void setVisited(boolean visited) {
+      this.visited = visited;
+    }
+    public void setWeight(int weight) {
+      this.weight = weight;
+    }
+    public void setPrevious(String previous) {
+      this.previous = previous;
+    }
+    public boolean getVisited() {
+      return this.visited;
+    }
+    public int getWeight() {
+      return this.weight;
+    }
+    public String getPrevious() {
+      return this.previous;
+    }
+    public String getName() {
+      return this.name;
+    }
   }
   public String readFile(String filename) {
     File f = new File(filename);
@@ -128,7 +186,7 @@ public class Graph {
     }
     return -1;
   }
-  public void print() {
+  public void printGraph() {
     for (int i = 0; i < size; i++) {
       SLinkedList current = array[i];
       Node temp = current.getHead();
