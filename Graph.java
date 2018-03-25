@@ -8,19 +8,16 @@ import java.util.*;
 public class Graph {
   int size; 
   SLinkedList[] array;
+  ArrayList<String> vertices;
 
   public static void main(String[] args) {
-    Graph graph = new Graph("city.txt");
-    graph.printGraph();
+    Graph graph = new Graph("test.txt");
+    //graph.printGraph();
     graph.shortestPath("a");
     //System.out.println(graph.getVertices());
   }
-  public Graph(int size, SLinkedList[] array) {
-    this.size = size;
-    this.array = array;
-  }
   public Graph(String fileName) {
-    ArrayList<String> list = stringList(fileName);
+    ArrayList<String> list = convertStringToArrayList(fileName);
     ArrayList<String> nodeList = new ArrayList<String>();
 
     nodeList.add(list.get(0));
@@ -36,9 +33,8 @@ public class Graph {
     nodeList = new ArrayList<String>(new HashSet<String>(nodeList));
     
     this.size = nodeList.size(); 
-
-    array = new SLinkedList[size];
-    for (int i = 0; i < size; i++) {
+    array = new SLinkedList[this.size];
+    for (int i = 0; i < this.size; i++) {
       array[i] = new SLinkedList();
     }
 
@@ -55,12 +51,19 @@ public class Graph {
         array[tempIndex].insert(list.get(i+1), Integer.parseInt(list.get(i+2)));
       }
     }
-    System.out.println("LINKED LIST SIZE: " + array.length);
-    for (int i = 0; i < array.length; i++) {
-      System.out.println(array[i].getSize());
+
+    // get all vertices
+    vertices = new ArrayList<String>();
+    for (int i = 0; i < list.size(); i++) {
+      if (i % 3 == 0 || i % 3 == 1) {
+        vertices.add(list.get(i));
+      }
     }
+    Set<String> set2 = new HashSet<String>(vertices);
+    vertices = new ArrayList<String>(new HashSet<String>(vertices));
+    System.out.println(vertices);
   }
-  public ArrayList<String> stringList(String fileName) {
+  public ArrayList<String> convertStringToArrayList(String fileName) {
     String string = readFile(fileName);
     ArrayList<String> list = new ArrayList<String>();
     for (int i = 0; i < string.length(); i++) {
@@ -89,24 +92,21 @@ public class Graph {
     return list;
   }
   public void shortestPath(String origin) {
-    Magic m1 = new Magic(array[0].getHead().getName(), false, "");
-    Magic m2 = new Magic(array[1].getHead().getName(), false, "");
-    Magic m3 = new Magic(array[2].getHead().getName(), false, "");
-    Magic m4 = new Magic(array[3].getHead().getName(), false, "");
-    Magic m5 = new Magic(array[4].getHead().getName(), false, "");
-    Magic m6 = new Magic(array[5].getHead().getName(), false, "");
-    Magic m7 = new Magic(array[1].getHead().getNext().getNext().getName(), false, "");
-    Magic m8 = new Magic(array[4].getHead().getNext().getNext().getName(), false, "");
-
-    Magic[] candidates = {m1, m2, m3, m4, m5, m6, m7, m8};
+    Magic[] candidates = new Magic[vertices.size()];
+    for (int i = 0; i < candidates.length; i++) {
+      candidates[i] = new Magic(vertices.get(i), false, "");
+    }
     int index = findMagicIndex(origin, candidates);
     candidates[index].setWeight(0);
     updateNeighborsOfNode(origin, candidates);
 
     int smallestIndex = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex].getName(), candidates);
+    while (smallestIndex != -1) {
+      updateNeighborsOfNode(candidates[smallestIndex].getName(), candidates);
+      smallestIndex = findSmallestUnvisitedMagic(candidates);
+    }
 
-    int smallestIndex2 = findSmallestUnvisitedMagic(candidates);
+    /*int smallestIndex2 = findSmallestUnvisitedMagic(candidates);
     updateNeighborsOfNode(candidates[smallestIndex2].getName(), candidates);
 
     int smallestIndex3 = findSmallestUnvisitedMagic(candidates);
@@ -116,7 +116,7 @@ public class Graph {
     updateNeighborsOfNode(candidates[smallestIndex4].getName(), candidates);
 
     int smallestIndex5 = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex5].getName(), candidates);
+    updateNeighborsOfNode(candidates[smallestIndex5].getName(), candidates); */
     printMagicArray(candidates);
   }
   public int findMagicIndex(String name, Magic[] array) {
@@ -130,7 +130,7 @@ public class Graph {
     return j;
   }
   public Object updateNeighborsOfNode(String startPoint, Magic[] candidates) {
-    int index = findLinkedListIndex(startPoint.charAt(0));
+    int index = findLinkedListIndex(startPoint);
     if (index == -1) {
       candidates[findMagicIndex(startPoint, candidates)].setVisited(true);
       return null;
