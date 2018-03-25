@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.File;
 
 public class Graph {
-
   int size; 
   SLinkedList[] array;
 
@@ -64,11 +63,22 @@ public class Graph {
     int index = findMagicIndex(origin, candidates);
     candidates[index].setWeight(0);
     updateNeighborsOfNode(origin, candidates);
-    for (int i = 0; i < candidates.length; i++) {
-      System.out.print("Index " + i + ": (" + candidates[i].getName() + ", " + candidates[i].getWeight() + ")");
-      System.out.print(" -- (Visited: " + candidates[i].getVisited() + ")");
-      System.out.print(" -- (Previous: \"" + candidates[i].getPrevious() + "\")\n");
-    }
+
+    int smallestIndex = findSmallestUnvisitedMagic(candidates);
+    updateNeighborsOfNode(candidates[smallestIndex].getName(), candidates);
+
+    int smallestIndex2 = findSmallestUnvisitedMagic(candidates);
+    updateNeighborsOfNode(candidates[smallestIndex2].getName(), candidates);
+
+    int smallestIndex3 = findSmallestUnvisitedMagic(candidates);
+    updateNeighborsOfNode(candidates[smallestIndex3].getName(), candidates);
+
+    int smallestIndex4 = findSmallestUnvisitedMagic(candidates);
+    updateNeighborsOfNode(candidates[smallestIndex4].getName(), candidates);
+
+    int smallestIndex5 = findSmallestUnvisitedMagic(candidates);
+    updateNeighborsOfNode(candidates[smallestIndex5].getName(), candidates);
+    printMagicArray(candidates);
   }
   public int findMagicIndex(String name, Magic[] array) {
     int j = -1;
@@ -83,16 +93,18 @@ public class Graph {
   public Object updateNeighborsOfNode(String startPoint, Magic[] candidates) {
     int index = findLinkedListIndex(startPoint.charAt(0));
     if (index == -1) {
+      candidates[findMagicIndex(startPoint, candidates)].setVisited(true);
       return null;
     }
+    Magic start = candidates[findMagicIndex(startPoint, candidates)];
     SLinkedList linkedList = array[index];
     Node startNode = linkedList.getHead().getNext();
     int j;
 
     for (int i = 0; i < linkedList.size - 1; i++) {
       j = findMagicIndex(startNode.getName(), candidates);
-      if (candidates[j].getWeight() > startNode.getValue() && !candidates[j].getVisited()) {
-        candidates[j].setWeight(startNode.getValue());
+      if (candidates[j].getWeight() > (startNode.getValue() + start.getWeight()) && !candidates[j].getVisited()) {
+        candidates[j].setWeight(startNode.getValue() + start.getWeight());
         candidates[j].setPrevious(startPoint);
       }
       startNode = startNode.getNext();
@@ -100,24 +112,36 @@ public class Graph {
     candidates[findMagicIndex(startPoint, candidates)].setVisited(true);
     return startNode;
   }
+  public void printMagicArray(Magic[] candidates) {
+    for (int i = 0; i < candidates.length; i++) {
+      System.out.print("Index " + i + ": (" + candidates[i].getName() + ", " + candidates[i].getWeight() + ")");
+      System.out.print(" -- (Visited: " + candidates[i].getVisited() + ")");
+      System.out.print(" -- (Previous: \"" + candidates[i].getPrevious() + "\")\n");
+    }
+  }
   public String getVertices() {
     return "";
   }
-  /*public Magic findSmallestUnvisitedMagic(Magic[] magic) {
-    Magic smallTemp = null;
+  public int findSmallestUnvisitedMagic(Magic[] magic) {
+    int smallTemp = -1;
+    Magic smallestMagic = null;
     for (int i = 0; i < magic.length; i++) {
       if (magic[i].getWeight() != Integer.MAX_VALUE && !magic[i].getVisited()) {
-        smallTemp = magic[i];
+        smallTemp = i;
         break;
       }
     }
-    for (int i = 1; i < magic.length; i++) {
-      if (smallTemp.getShortestPath() > magic[i].getShortestPath() && !magic[i].getVisited()) {
-        smallTemp = magic[i];
+    if (smallTemp == -1) {
+      return smallTemp;
+    }
+    smallestMagic = magic[smallTemp];
+    for (int i = 0; i < magic.length; i++) {
+      if (smallestMagic.getWeight() > magic[i].getWeight() && !magic[i].getVisited()) {
+        smallTemp = i;
       }
     }
     return smallTemp;
-  } */
+  } 
   // Magic Class
   public static class Magic {
     String name;
