@@ -11,10 +11,16 @@ public class Graph {
   ArrayList<String> vertices;
 
   public static void main(String[] args) {
-    Graph graph = new Graph("test.txt");
+    Graph graph = new Graph("city.txt");
     //graph.printGraph();
     graph.shortestPath("a");
-    //System.out.println(graph.getVertices());
+    graph.shortestPath("b");
+    graph.shortestPath("c");
+    graph.shortestPath("d");
+    graph.shortestPath("e");
+    graph.shortestPath("f");
+    graph.shortestPath("g");
+    graph.shortestPath("h");
   }
   public Graph(String fileName) {
     ArrayList<String> list = convertStringToArrayList(fileName);
@@ -29,7 +35,6 @@ public class Graph {
     }
     // convert a list into a set will get rid of duplicate elements
     // then convert the set back to list
-    Set<String> set = new HashSet<String>(nodeList);
     nodeList = new ArrayList<String>(new HashSet<String>(nodeList));
     
     this.size = nodeList.size(); 
@@ -59,37 +64,9 @@ public class Graph {
         vertices.add(list.get(i));
       }
     }
-    Set<String> set2 = new HashSet<String>(vertices);
+    // get rid of redundant elements
     vertices = new ArrayList<String>(new HashSet<String>(vertices));
-    System.out.println(vertices);
-  }
-  public ArrayList<String> convertStringToArrayList(String fileName) {
-    String string = readFile(fileName);
-    ArrayList<String> list = new ArrayList<String>();
-    for (int i = 0; i < string.length(); i++) {
-      list.add(i, "");
-    }
-
-    char temp = '\u0000';
-    int index = 0;
-    for (int i = 0; i < string.length(); i++) {
-      temp = string.charAt(i);
-      if (Character.isLetter(temp)) {
-        list.set(index, Character.toString(temp));
-        index++;
-      } else if (Character.isDigit(temp)) {
-        String s = list.get(index) + Character.toString(temp);
-        list.set(index, s);
-      } else if (temp == '\n') {
-        index++;
-      }
-    }
-    for (int i = string.length() - 1; i >= 0; i--) {
-      if (list.get(i).equals("")) {
-        list.remove(i);
-      }
-    }
-    return list;
+    // System.out.println(vertices);
   }
   public void shortestPath(String origin) {
     Magic[] candidates = new Magic[vertices.size()];
@@ -105,19 +82,33 @@ public class Graph {
       updateNeighborsOfNode(candidates[smallestIndex].getName(), candidates);
       smallestIndex = findSmallestUnvisitedMagic(candidates);
     }
-
-    /*int smallestIndex2 = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex2].getName(), candidates);
-
-    int smallestIndex3 = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex3].getName(), candidates);
-
-    int smallestIndex4 = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex4].getName(), candidates);
-
-    int smallestIndex5 = findSmallestUnvisitedMagic(candidates);
-    updateNeighborsOfNode(candidates[smallestIndex5].getName(), candidates); */
-    printMagicArray(candidates);
+    //printMagicArray(candidates);
+    printShortestPathFromNode(candidates[index].getName(), candidates);
+  }
+  public void printShortestPathFromNode(String node, Magic[] candidates) {
+    System.out.println("\n" + node + " origin: ");
+    String path = "";
+    int index = 0;
+    String previous = "";
+    int weight = 0;
+    for (int i = 0; i < vertices.size(); i++) {
+      if (!node.equals(vertices.get(i))) {
+        index = findMagicIndex(vertices.get(i), candidates);
+        weight = candidates[index].getWeight();
+        previous = candidates[index].getPrevious();
+        path += vertices.get(i);
+        while (!previous.equals("")) {
+          path += previous;
+          index = findMagicIndex(previous, candidates);
+          previous = candidates[index].getPrevious();
+        }
+      }
+      if (!path.equals(vertices.get(i)) && !path.equals("")) {
+        path = new StringBuffer(path).reverse().toString();
+        System.out.printf("%-8s%-8d%-8s\n", vertices.get(i), weight, path);
+      }
+      path = "";
+    }
   }
   public int findMagicIndex(String name, Magic[] array) {
     int j = -1;
@@ -151,16 +142,6 @@ public class Graph {
     candidates[findMagicIndex(startPoint, candidates)].setVisited(true);
     return startNode;
   }
-  public void printMagicArray(Magic[] candidates) {
-    for (int i = 0; i < candidates.length; i++) {
-      System.out.print("Index " + i + ": (" + candidates[i].getName() + ", " + candidates[i].getWeight() + ")");
-      System.out.print(" -- (Visited: " + candidates[i].getVisited() + ")");
-      System.out.print(" -- (Previous: \"" + candidates[i].getPrevious() + "\")\n");
-    }
-  }
-  public String getVertices() {
-    return "";
-  }
   public int findSmallestUnvisitedMagic(Magic[] magic) {
     int smallTemp = -1;
     Magic smallestMagic = null;
@@ -180,6 +161,41 @@ public class Graph {
       }
     }
     return smallTemp;
+  }
+  public void printMagicArray(Magic[] candidates) {
+    for (int i = 0; i < candidates.length; i++) {
+      System.out.print("Index " + i + ": (" + candidates[i].getName() + ", " + candidates[i].getWeight() + ")");
+      System.out.print(" -- (Visited: " + candidates[i].getVisited() + ")");
+      System.out.print(" -- (Previous: \"" + candidates[i].getPrevious() + "\")\n");
+    }
+  }
+  public ArrayList<String> convertStringToArrayList(String fileName) {
+    String string = readFile(fileName);
+    ArrayList<String> list = new ArrayList<String>();
+    for (int i = 0; i < string.length(); i++) {
+      list.add(i, "");
+    }
+
+    char temp = '\u0000';
+    int index = 0;
+    for (int i = 0; i < string.length(); i++) {
+      temp = string.charAt(i);
+      if (Character.isLetter(temp)) {
+        list.set(index, Character.toString(temp));
+        index++;
+      } else if (Character.isDigit(temp)) {
+        String s = list.get(index) + Character.toString(temp);
+        list.set(index, s);
+      } else if (temp == '\n') {
+        index++;
+      }
+    }
+    for (int i = string.length() - 1; i >= 0; i--) {
+      if (list.get(i).equals("")) {
+        list.remove(i);
+      }
+    }
+    return list;
   }
   // Magic Class
   public static class Magic {
