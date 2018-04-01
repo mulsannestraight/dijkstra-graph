@@ -5,21 +5,15 @@ import java.io.File;
 import java.util.*;
 
 public class Graph {
-  int size; 
+  int size;
   SLinkedList[] array;
   ArrayList<String> vertices;
 
   public static void main(String[] args) {
     Graph graph = new Graph("city.txt");
-    //graph.printGraph();
     graph.shortestPath("a");
-    graph.shortestPath("b");
-    graph.shortestPath("c");
-    graph.shortestPath("d");
-    graph.shortestPath("e");
-    graph.shortestPath("f");
-    graph.shortestPath("g");
-    graph.shortestPath("h");
+    //graph.printGraph();
+    //graph.shortestPath("a");
   }
   public Graph(String fileName) {
     ArrayList<String> list = convertStringToArrayList(fileName);
@@ -35,8 +29,8 @@ public class Graph {
     // convert a list into a set will get rid of duplicate elements
     // then convert the set back to list
     nodeList = new ArrayList<String>(new HashSet<String>(nodeList));
-    
-    this.size = nodeList.size(); 
+
+    this.size = nodeList.size();
     array = new SLinkedList[this.size];
     for (int i = 0; i < this.size; i++) {
       array[i] = new SLinkedList();
@@ -52,7 +46,7 @@ public class Graph {
         array[currentIndex].insert(list.get(i + 1), Integer.parseInt(list.get(i + 2)));
         currentIndex++;
       } else {
-        array[tempIndex].insert(list.get(i+1), Integer.parseInt(list.get(i+2)));
+        array[tempIndex].insert(list.get(i + 1), Integer.parseInt(list.get(i + 2)));
       }
     }
 
@@ -73,6 +67,10 @@ public class Graph {
       candidates[i] = new Magic(vertices.get(i), false, "");
     }
     int index = findMagicIndex(origin, candidates);
+    if (index == -1) {
+      System.out.println("Vertex not found! Try again!");
+      return;
+    }
     candidates[index].setWeight(0);
     updateNeighborsOfNode(origin, candidates);
 
@@ -85,7 +83,9 @@ public class Graph {
     printShortestPathFromNode(candidates[index].getName(), candidates);
   }
   public void printShortestPathFromNode(String node, Magic[] candidates) {
-    System.out.println("\n" + node + " origin: ");
+    System.out.println("\n----------------------------");
+    System.out.printf("|         %-17s|\n", node + " origin ");
+    System.out.println("----------------------------");
     String path = "";
     int index = 0;
     String previous = "";
@@ -104,7 +104,8 @@ public class Graph {
       }
       if (!path.equals(vertices.get(i)) && !path.equals("")) {
         path = new StringBuffer(path).reverse().toString();
-        System.out.printf("%-8s%-8d%-8s\n", vertices.get(i), weight, path);
+        System.out.printf("| %-7s| %-7d| %-7s|\n", vertices.get(i), weight, path);
+        System.out.println("----------------------------");
       }
       path = "";
     }
@@ -115,7 +116,7 @@ public class Graph {
       if (name.equals(array[i].getName())) {
         j = i;
         break;
-      } 
+      }
     }
     return j;
   }
@@ -202,6 +203,7 @@ public class Graph {
     boolean visited;
     int weight;
     String previous;
+
     public Magic(String name, boolean visited, String previous) {
       this.name = name;
       this.visited = visited;
@@ -273,7 +275,7 @@ public class Graph {
   public static class SLinkedList {
     int size = 0;
     Node head;
-    
+
     // Intended for initial SLinkedList creation ONLY
     public SLinkedList(Node head) {
       this.head = head;
@@ -305,21 +307,7 @@ public class Graph {
         size++;
       }
     }
-    public void insert(Node node) {
-      if (size == 0) {
-        head = node;
-        size++;
-      } else {
-        Node current = head;
-        for (int i = 0; i < size - 1; i++) {
-          current = current.getNext();
-        }
-        current.setNext(node);
-        size++;
-      }
-    }
   }
-
   /*
     Node Class to be used in SLinkedList Class
   */
